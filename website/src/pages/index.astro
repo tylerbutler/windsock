@@ -1,22 +1,43 @@
 ---
+import { Code } from 'astro-expressive-code/components';
 import '../styles/global.css';
+
+const repositoryUrl = 'https://github.com/tylerbutler/windsock';
+const readmeUrl = repositoryUrl + '#readme';
+const sourceUrl = repositoryUrl + '/blob/main/src/windsock.gleam';
 
 const primitives = [
   {
     name: 'Socket.IO event frames',
     detail: 'Encode and decode text packets shaped like 42["event", ...args].',
-    code: 'windsock.encode("submitOp", [json.string("client-1")])',
+    ownedBy: 'windsock',
+    code: 'encode(event, args)',
   },
   {
     name: 'Dynamic positional args',
     detail: 'Keep event arguments dynamic so callers decode with their own schema.',
+    ownedBy: 'caller',
     code: 'Incoming(event: String, args: List(Dynamic))',
   },
   {
     name: 'Engine.IO heartbeat constants',
     detail: 'Expose ping and pong packets without owning transport negotiation.',
-    code: 'windsock.ping == "2" && windsock.pong == "3"',
+    ownedBy: 'windsock',
+    code: 'ping == "2" / pong == "3"',
   },
+];
+
+const scopeRows = [
+  ['Encodes', 'Socket.IO event packets with caller-provided event names and JSON args.'],
+  ['Decodes', 'Text event frames into an event name plus dynamic positional payloads.'],
+  ['Exposes', 'Engine.IO ping and pong packet constants for heartbeat boundaries.'],
+  ['Leaves out', 'Namespaces, ACK ids, binary attachments, reconnection, and transport negotiation.'],
+];
+
+const apiItems = [
+  ['encode(event, args)', 'Returns a Socket.IO 42[...] event packet.'],
+  ['decode(text)', 'Returns Result(Incoming, DecodeError).'],
+  ['ping / pong', 'Expose Engine.IO heartbeat packet constants.'],
 ];
 
 const errors = [
@@ -25,20 +46,36 @@ const errors = [
 ];
 
 const frameExample = '42["submitOp", "client-1", []]';
-const encodeExample = `import gleam/json
-import windsock
-
-pub fn frame() {
-  windsock.encode("submitOp", [
-    json.string("client-1"),
-    json.preprocessed_array([]),
-  ])
-}`;
-const decodeExample = `case windsock.decode("42[\\"op\\",\\"c1\\"]") {
-  Ok(incoming) -> incoming.event
-  Error(windsock.InvalidFormat(reason)) -> reason
-  Error(windsock.InvalidJson(reason)) -> reason
-}`;
+const installSnippet = [
+  '[dependencies]',
+  'windsock = { git = "https://github.com/tylerbutler/windsock", ref = "main" }',
+].join('\n');
+const encodeExample = [
+  'import gleam/json',
+  'import windsock',
+  '',
+  'pub fn frame() {',
+  '  windsock.encode("submitOp", [',
+  '    json.string("client-1"),',
+  '    json.preprocessed_array([]),',
+  '  ])',
+  '}',
+].join('\n');
+const encodeOutput = 'Ok("42[\\"submitOp\\",\\"client-1\\",[]]")';
+const decodeExample = [
+  'case windsock.decode("42[\\"op\\",\\"c1\\"]") {',
+  '  Ok(incoming) -> incoming.event',
+  '  Error(windsock.InvalidFormat(reason)) -> reason',
+  '  Error(windsock.InvalidJson(reason)) -> reason',
+  '}',
+].join('\n');
+const decodeOutput = 'Ok(Incoming(event: "op", args: [<Dynamic>]))';
+const errorExample = [
+  'case windsock.decode("42{not-json}") {',
+  '  Error(windsock.InvalidJson(reason)) -> reason',
+  '  other -> other',
+  '}',
+].join('\n');
 ---
 
 <!doctype html>
@@ -63,7 +100,8 @@ const decodeExample = `case windsock.decode("42[\\"op\\",\\"c1\\"]") {
         <div class="nav-links">
           <a href="#quick-start">Quick start</a>
           <a href="#api">API</a>
-          <a href="https://github.com/tylerbutler/windsock">GitHub</a>
+          <a href={readmeUrl}>README</a>
+          <a href={repositoryUrl}>GitHub</a>
         </div>
       </nav>
     </header>
@@ -77,17 +115,14 @@ const decodeExample = `case windsock.decode("42[\\"op\\",\\"c1\\"]") {
             windsock encodes and decodes the text packets your higher-level protocol already knows how to name. It handles the frame shape; you keep ownership of schemas, sessions, transports, and application vocabulary.
           </p>
           <div class="hero-actions" aria-label="Primary actions">
-            <a class="button primary" href="#quick-start">Read quick start</a>
-            <a class="button secondary" href="https://github.com/tylerbutler/windsock">View source</a>
+            <a class="button primary" href="#install">Install windsock</a>
+            <a class="button secondary" href={readmeUrl}>Read README</a>
+            <a class="button text" href={sourceUrl}>View source</a>
           </div>
         </div>
 
         <aside class="frame-panel" aria-label="Example Socket.IO event frame">
-          <div class="panel-topline">
-            <span>event frame</span>
-            <code>text/plain</code>
-          </div>
-          <pre><code>{frameExample}</code></pre>
+          <Code code={frameExample} lang="text" title="Socket.IO event frame" wrap />
           <dl class="frame-parts">
             <div>
               <dt>42</dt>
@@ -106,19 +141,26 @@ const decodeExample = `case windsock.decode("42[\\"op\\",\\"c1\\"]") {
       </section>
 
       <section class="boundary" aria-labelledby="boundary-title">
-        <div>
-          <p class="section-label">Scope</p>
+        <div class="boundary-copy">
           <h2 id="boundary-title">A frame library, not a client stack.</h2>
+          <p>
+            windsock is intentionally narrow: enough frame handling to trust at a protocol boundary, without pretending to own the rest of your Socket.IO or Engine.IO integration.
+          </p>
         </div>
-        <p>
-          windsock is intentionally narrow. It does not implement namespaces, binary attachments, ACK packet ids, Engine.IO transport negotiation, reconnection, or a full Socket.IO client/server. Those choices stay above this layer.
-        </p>
+        <dl class="scope-table" aria-label="Supported and unsupported scope">
+          {scopeRows.map(([term, detail]) => (
+            <div>
+              <dt>{term}</dt>
+              <dd>{detail}</dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
       <section class="primitive-section" aria-labelledby="primitives-title">
-        <div class="section-heading">
-          <p class="section-label">Primitives</p>
-          <h2 id="primitives-title">Everything exposed has one protocol job.</h2>
+        <div class="section-heading compact">
+          <h2 id="primitives-title">Three primitives, one protocol job each.</h2>
+          <p>Each exposed surface keeps the Socket.IO frame boundary explicit while leaving application vocabulary above this layer.</p>
         </div>
         <div class="primitive-list">
           {primitives.map((primitive) => (
@@ -127,7 +169,10 @@ const decodeExample = `case windsock.decode("42[\\"op\\",\\"c1\\"]") {
                 <h3>{primitive.name}</h3>
                 <p>{primitive.detail}</p>
               </div>
-              <code>{primitive.code}</code>
+              <div class="primitive-meta">
+                <span>{primitive.ownedBy}</span>
+                <code>{primitive.code}</code>
+              </div>
             </article>
           ))}
         </div>
@@ -136,33 +181,63 @@ const decodeExample = `case windsock.decode("42[\\"op\\",\\"c1\\"]") {
       <section id="quick-start" class="quick-start" aria-labelledby="quick-start-title">
         <div class="section-heading">
           <p class="section-label">Quick start</p>
-          <h2 id="quick-start-title">Create a frame, then decode at your own boundary.</h2>
+          <h2 id="quick-start-title">Install, encode, decode, and handle the bad frame.</h2>
         </div>
-        <div class="code-grid">
+        <div id="install" class="install-strip" aria-label="Install windsock">
           <div>
-            <h3>Encode</h3>
-            <pre><code>{encodeExample}</code></pre>
+            <h3>Add the git dependency</h3>
+            <p>windsock is pre-1.0 and not published on Hex yet. Add it explicitly under dependencies from the main branch.</p>
           </div>
-          <div>
-            <h3>Decode</h3>
-            <pre><code>{decodeExample}</code></pre>
-          </div>
+          <Code code={installSnippet} lang="toml" title="gleam.toml" />
+        </div>
+        <div class="code-sequence" aria-label="Quick start examples">
+          <article class="example-step">
+            <div class="step-copy">
+              <span>1</span>
+              <h3>Encode a caller-owned event</h3>
+              <p>Pass the event name and JSON arguments; windsock only shapes the Socket.IO event packet.</p>
+            </div>
+            <Code code={encodeExample} lang="gleam" title="src/frame.gleam" />
+            <Code code={encodeOutput} lang="text" title="result" frame="none" wrap />
+          </article>
+          <article class="example-step">
+            <div class="step-copy">
+              <span>2</span>
+              <h3>Decode at your own boundary</h3>
+              <p>Keep argument schemas in your caller while windsock verifies the packet shape.</p>
+            </div>
+            <Code code={decodeExample} lang="gleam" title="src/decode.gleam" />
+            <Code code={decodeOutput} lang="text" title="shape" frame="none" wrap />
+          </article>
+          <article class="example-step">
+            <div class="step-copy">
+              <span>3</span>
+              <h3>Branch on explicit errors</h3>
+              <p>Malformed JSON and malformed event arrays stay separate so callers can report the right failure.</p>
+            </div>
+            <Code code={errorExample} lang="gleam" title="src/error.gleam" />
+          </article>
         </div>
       </section>
 
       <section id="api" class="api-section" aria-labelledby="api-title">
-        <div class="section-heading">
-          <p class="section-label">API semantics</p>
+        <div class="api-intro">
           <h2 id="api-title">Small return types make failure explicit.</h2>
+          <p>
+            The public API is short enough to scan in one pass. Use the source module and README for signatures while the package is pre-1.0.
+          </p>
         </div>
-        <div class="api-layout">
+        <div class="api-reference">
           <article class="signature">
             <h3>Core functions</h3>
-            <ul>
-              <li><code>encode(event, args)</code> returns a <code>42[...]</code> event packet.</li>
-              <li><code>encode_heartbeat()</code> returns the Engine.IO ping packet.</li>
-              <li><code>decode(text)</code> returns <code>Result(Incoming, DecodeError)</code>.</li>
-            </ul>
+            <dl class="reference-list">
+              {apiItems.map(([name, detail]) => (
+                <div>
+                  <dt><code>{name}</code></dt>
+                  <dd>{detail}</dd>
+                </div>
+              ))}
+            </dl>
           </article>
           <article class="signature">
             <h3>Decode errors</h3>
@@ -176,7 +251,52 @@ const decodeExample = `case windsock.decode("42[\\"op\\",\\"c1\\"]") {
             </dl>
           </article>
         </div>
+        <div class="final-cta">
+          <p>Ready to wire frames into your own protocol layer?</p>
+          <a class="button primary" href="#install">Copy the dependency snippet</a>
+          <a class="button secondary" href={sourceUrl}>Open source module</a>
+        </div>
       </section>
     </main>
+
+    <footer class="site-footer">
+      <div>
+        <strong>windsock</strong>
+        <span>Socket.IO frame primitives for Gleam.</span>
+      </div>
+      <nav aria-label="Footer navigation">
+        <a href="#install">Install</a>
+        <a href={readmeUrl}>README</a>
+        <a href={sourceUrl}>API source</a>
+        <a href={repositoryUrl}>Repository</a>
+      </nav>
+    </footer>
+
+    <script>
+      const links = [...document.querySelectorAll('.nav-links a[href^="#"]')];
+      const sections = links
+        .map((link) => document.querySelector(link.getAttribute('href') || ''))
+        .filter(Boolean);
+
+      if ('IntersectionObserver' in window && links.length > 0) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            const active = entries
+              .filter((entry) => entry.isIntersecting)
+              .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]?.target;
+
+            if (!active) return;
+
+            for (const link of links) {
+              const selected = link.getAttribute('href') === '#' + active.id;
+              link.toggleAttribute('aria-current', selected);
+            }
+          },
+          { rootMargin: '-25% 0px -60% 0px', threshold: [0.1, 0.4, 0.8] },
+        );
+
+        sections.forEach((section) => observer.observe(section));
+      }
+    </script>
   </body>
 </html>
