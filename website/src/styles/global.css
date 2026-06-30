@@ -124,14 +124,16 @@ main,
 
 .brand-mark {
   display: inline-grid;
-  min-width: 2.5rem;
-  min-height: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
   place-items: center;
-  border: 1px solid var(--color-primary);
+}
+
+.brand-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
   border-radius: var(--radius-sm);
-  color: var(--color-primary);
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
 }
 
 .nav-links {
@@ -280,7 +282,6 @@ h3 {
 
 .frame-panel,
 .install-strip,
-.example-step,
 .signature {
   max-width: 100%;
   border: 1px solid var(--color-border);
@@ -452,7 +453,17 @@ dd {
   display: grid;
   grid-template-columns: minmax(12rem, 0.35fr) minmax(0, 1fr);
   gap: var(--space-lg);
-  padding: var(--space-lg);
+  border-block-start: 1px solid var(--color-border);
+  padding-block: var(--space-xl);
+}
+
+.example-step:first-child {
+  border-block-start: 0;
+  padding-block-start: 0;
+}
+
+.example-step:last-child {
+  padding-block-end: 0;
 }
 
 .step-copy span {
@@ -635,9 +646,16 @@ dd {
   }
 
   .install-strip,
-  .example-step,
   .signature {
     padding: var(--space-md);
+  }
+
+  .example-step {
+    padding-block: var(--space-lg);
+  }
+
+  .example-step:first-child {
+    padding-block-start: 0;
   }
 
   .site-footer nav {

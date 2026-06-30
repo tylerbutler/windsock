@@ -46,10 +46,7 @@ const errors = [
 ];
 
 const frameExample = '42["submitOp", "client-1", []]';
-const installSnippet = [
-  '[dependencies]',
-  'windsock = { git = "https://github.com/tylerbutler/windsock", ref = "main" }',
-].join('\n');
+const installSnippet = 'windsock = { git = "https://github.com/tylerbutler/windsock", ref = "main" }';
 const encodeExample = [
   'import gleam/json',
   'import windsock',
@@ -71,9 +68,10 @@ const decodeExample = [
 ].join('\n');
 const decodeOutput = 'Ok(Incoming(event: "op", args: [<Dynamic>]))';
 const errorExample = [
-  'case windsock.decode("42{not-json}") {',
-  '  Error(windsock.InvalidJson(reason)) -> reason',
-  '  other -> other',
+  'case windsock.decode(text) {',
+  '  Ok(incoming) -> handle_event(incoming)',
+  '  Error(windsock.InvalidJson(reason)) -> reject_frame("bad-json", reason)',
+  '  Error(windsock.InvalidFormat(reason)) -> reject_frame("bad-frame", reason)',
   '}',
 ].join('\n');
 ---
@@ -88,13 +86,14 @@ const errorExample = [
       content="windsock provides narrow Socket.IO and Engine.IO text-frame primitives for Gleam."
     />
     <title>windsock · Socket.IO frame primitives for Gleam</title>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header" aria-label="Site header">
       <nav class="nav" aria-label="Primary navigation">
         <a class="brand" href="/" aria-label="windsock home">
-          <span class="brand-mark" aria-hidden="true">42</span>
+          <span class="brand-mark" aria-hidden="true"><img src="/icon.svg" alt="" /></span>
           <span>windsock</span>
         </a>
         <div class="nav-links">
@@ -186,9 +185,9 @@ const errorExample = [
         <div id="install" class="install-strip" aria-label="Install windsock">
           <div>
             <h3>Add the git dependency</h3>
-            <p>windsock is pre-1.0 and not published on Hex yet. Add it explicitly under dependencies from the main branch.</p>
+            <p>windsock is pre-1.0 and not published on Hex yet. Paste this line inside your existing `[dependencies]` block.</p>
           </div>
-          <Code code={installSnippet} lang="toml" title="gleam.toml" />
+          <Code code={installSnippet} lang="toml" title="gleam.toml [dependencies]" />
         </div>
         <div class="code-sequence" aria-label="Quick start examples">
           <article class="example-step">
@@ -213,7 +212,7 @@ const errorExample = [
             <div class="step-copy">
               <span>3</span>
               <h3>Branch on explicit errors</h3>
-              <p>Malformed JSON and malformed event arrays stay separate so callers can report the right failure.</p>
+              <p>Map malformed JSON and malformed event arrays into caller-owned protocol failures.</p>
             </div>
             <Code code={errorExample} lang="gleam" title="src/error.gleam" />
           </article>
@@ -253,7 +252,7 @@ const errorExample = [
         </div>
         <div class="final-cta">
           <p>Ready to wire frames into your own protocol layer?</p>
-          <a class="button primary" href="#install">Copy the dependency snippet</a>
+          <a class="button primary" href="#install">Jump to dependency snippet</a>
           <a class="button secondary" href={sourceUrl}>Open source module</a>
         </div>
       </section>
