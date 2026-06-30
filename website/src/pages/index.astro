@@ -58,12 +58,17 @@ const encodeExample = [
   '  ])',
   '}',
 ].join('\n');
-const encodeOutput = 'Ok("42[\\"submitOp\\",\\"client-1\\",[]]")';
+const encodeOutput = '42["submitOp","client-1",[]]';
 const decodeExample = [
-  'case windsock.decode("42[\\"op\\",\\"c1\\"]") {',
-  '  Ok(incoming) -> incoming.event',
-  '  Error(windsock.InvalidFormat(reason)) -> reason',
-  '  Error(windsock.InvalidJson(reason)) -> reason',
+  'import gleam/json',
+  '',
+  'pub fn event_name() {',
+  '  let text = windsock.encode("op", [json.string("c1")])',
+  '  case windsock.decode(text) {',
+  '    Ok(incoming) -> incoming.event',
+  '    Error(windsock.InvalidFormat(reason)) -> reason',
+  '    Error(windsock.InvalidJson(reason)) -> reason',
+  '  }',
   '}',
 ].join('\n');
 const decodeOutput = 'Ok(Incoming(event: "op", args: [<Dynamic>]))';
