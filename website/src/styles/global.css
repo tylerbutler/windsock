@@ -154,6 +154,61 @@ main,
   color: var(--color-primary);
 }
 
+.nav-end {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.theme-toggle {
+  --toggle-size: 2.75rem;
+  display: inline-grid;
+  width: var(--toggle-size);
+  height: var(--toggle-size);
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: background-color 180ms ease-out, border-color 180ms ease-out, color 180ms ease-out;
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.theme-toggle svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: block;
+}
+
+.theme-toggle .icon-sun {
+  display: none;
+}
+
+:root[data-theme="dark"] .theme-toggle .icon-sun {
+  display: block;
+}
+
+:root[data-theme="dark"] .theme-toggle .icon-moon {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle .icon-sun {
+    display: block;
+  }
+
+  :root:not([data-theme="light"]) .theme-toggle .icon-moon {
+    display: none;
+  }
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1.04fr) minmax(21rem, 0.78fr);
@@ -563,7 +618,7 @@ dd {
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --color-bg: oklch(0.17 0.012 160);
     --color-surface: oklch(0.21 0.014 160);
     --color-surface-strong: oklch(0.25 0.018 160);
@@ -575,9 +630,25 @@ dd {
     --color-primary-soft: oklch(0.28 0.04 160);
   }
 
-  :focus-visible {
+  :root:not([data-theme="light"]) :focus-visible {
     outline-color: oklch(0.82 0.13 160);
   }
+}
+
+:root[data-theme="dark"] {
+  --color-bg: oklch(0.17 0.012 160);
+  --color-surface: oklch(0.21 0.014 160);
+  --color-surface-strong: oklch(0.25 0.018 160);
+  --color-ink: oklch(0.96 0.006 160);
+  --color-muted: oklch(0.74 0.022 160);
+  --color-border: oklch(0.33 0.022 160);
+  --color-primary: oklch(0.78 0.1 160);
+  --color-primary-hover: oklch(0.85 0.095 160);
+  --color-primary-soft: oklch(0.28 0.04 160);
+}
+
+:root[data-theme="dark"] :focus-visible {
+  outline-color: oklch(0.82 0.13 160);
 }
 
 @media (max-width: 56rem) {
@@ -603,6 +674,11 @@ dd {
   .site-footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .nav-end {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .nav-links {
