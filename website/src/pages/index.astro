@@ -35,9 +35,9 @@ const scopeRows = [
 ];
 
 const apiItems = [
-  ['encode(event, args)', 'Returns a Socket.IO 42[...] event packet.'],
-  ['decode(text)', 'Returns Result(Incoming, DecodeError).'],
-  ['ping / pong', 'Expose Engine.IO heartbeat packet constants.'],
+  ['encode(event: String, args: List(json.Json)) -> String', 'Builds a Socket.IO 42[...] event packet from a caller-owned event name and JSON args.'],
+  ['decode(text: String) -> Result(Incoming, DecodeError)', 'Parses a text event frame into an event name plus dynamic positional args.'],
+  ['ping: String / pong: String', 'Engine.IO heartbeat packet constants, "2" and "3".'],
 ];
 
 const errors = [
@@ -108,7 +108,6 @@ const errorExample = [
     <main id="main">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <p class="context-line">Gleam primitives for text-frame boundaries</p>
           <h1 id="hero-title">Socket.IO frames, kept deliberately small.</h1>
           <p class="hero-text">
             windsock encodes and decodes the text packets your higher-level protocol already knows how to name. It handles the frame shape; you keep ownership of schemas, sessions, transports, and application vocabulary.
@@ -179,7 +178,6 @@ const errorExample = [
 
       <section id="quick-start" class="quick-start" aria-labelledby="quick-start-title">
         <div class="section-heading">
-          <p class="section-label">Quick start</p>
           <h2 id="quick-start-title">Install, encode, decode, and handle the bad frame.</h2>
         </div>
         <div id="install" class="install-strip" aria-label="Install windsock">

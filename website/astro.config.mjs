@@ -5,7 +5,7 @@ export default defineConfig({
   site: 'https://tylerbutler.github.io/windsock',
   integrations: [
     expressiveCode({
-      themes: ['github-light'],
+      themes: ['github-light', 'github-dark'],
       styleOverrides: {
         borderRadius: '0.875rem',
         frames: {
