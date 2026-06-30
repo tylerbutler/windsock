@@ -1,0 +1,182 @@
+---
+import '../styles/global.css';
+
+const primitives = [
+  {
+    name: 'Socket.IO event frames',
+    detail: 'Encode and decode text packets shaped like 42["event", ...args].',
+    code: 'windsock.encode("submitOp", [json.string("client-1")])',
+  },
+  {
+    name: 'Dynamic positional args',
+    detail: 'Keep event arguments dynamic so callers decode with their own schema.',
+    code: 'Incoming(event: String, args: List(Dynamic))',
+  },
+  {
+    name: 'Engine.IO heartbeat constants',
+    detail: 'Expose ping and pong packets without owning transport negotiation.',
+    code: 'windsock.ping == "2" && windsock.pong == "3"',
+  },
+];
+
+const errors = [
+  ['InvalidJson', 'The frame prefix was right, but the JSON payload could not parse.'],
+  ['InvalidFormat', 'The packet was not a Socket.IO event array, or the event name was not a string.'],
+];
+
+const frameExample = '42["submitOp", "client-1", []]';
+const encodeExample = `import gleam/json
+import windsock
+
+pub fn frame() {
+  windsock.encode("submitOp", [
+    json.string("client-1"),
+    json.preprocessed_array([]),
+  ])
+}`;
+const decodeExample = `case windsock.decode("42[\\"op\\",\\"c1\\"]") {
+  Ok(incoming) -> incoming.event
+  Error(windsock.InvalidFormat(reason)) -> reason
+  Error(windsock.InvalidJson(reason)) -> reason
+}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="windsock provides narrow Socket.IO and Engine.IO text-frame primitives for Gleam."
+    />
+    <title>windsock · Socket.IO frame primitives for Gleam</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" aria-label="Site header">
+      <nav class="nav" aria-label="Primary navigation">
+        <a class="brand" href="/" aria-label="windsock home">
+          <span class="brand-mark" aria-hidden="true">42</span>
+          <span>windsock</span>
+        </a>
+        <div class="nav-links">
+          <a href="#quick-start">Quick start</a>
+          <a href="#api">API</a>
+          <a href="https://github.com/tylerbutler/windsock">GitHub</a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="context-line">Gleam primitives for text-frame boundaries</p>
+          <h1 id="hero-title">Socket.IO frames, kept deliberately small.</h1>
+          <p class="hero-text">
+            windsock encodes and decodes the text packets your higher-level protocol already knows how to name. It handles the frame shape; you keep ownership of schemas, sessions, transports, and application vocabulary.
+          </p>
+          <div class="hero-actions" aria-label="Primary actions">
+            <a class="button primary" href="#quick-start">Read quick start</a>
+            <a class="button secondary" href="https://github.com/tylerbutler/windsock">View source</a>
+          </div>
+        </div>
+
+        <aside class="frame-panel" aria-label="Example Socket.IO event frame">
+          <div class="panel-topline">
+            <span>event frame</span>
+            <code>text/plain</code>
+          </div>
+          <pre><code>{frameExample}</code></pre>
+          <dl class="frame-parts">
+            <div>
+              <dt>42</dt>
+              <dd>Socket.IO event packet</dd>
+            </div>
+            <div>
+              <dt>"submitOp"</dt>
+              <dd>Caller-owned event name</dd>
+            </div>
+            <div>
+              <dt>args</dt>
+              <dd>Dynamic positional payload</dd>
+            </div>
+          </dl>
+        </aside>
+      </section>
+
+      <section class="boundary" aria-labelledby="boundary-title">
+        <div>
+          <p class="section-label">Scope</p>
+          <h2 id="boundary-title">A frame library, not a client stack.</h2>
+        </div>
+        <p>
+          windsock is intentionally narrow. It does not implement namespaces, binary attachments, ACK packet ids, Engine.IO transport negotiation, reconnection, or a full Socket.IO client/server. Those choices stay above this layer.
+        </p>
+      </section>
+
+      <section class="primitive-section" aria-labelledby="primitives-title">
+        <div class="section-heading">
+          <p class="section-label">Primitives</p>
+          <h2 id="primitives-title">Everything exposed has one protocol job.</h2>
+        </div>
+        <div class="primitive-list">
+          {primitives.map((primitive) => (
+            <article class="primitive-item">
+              <div>
+                <h3>{primitive.name}</h3>
+                <p>{primitive.detail}</p>
+              </div>
+              <code>{primitive.code}</code>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="quick-start" class="quick-start" aria-labelledby="quick-start-title">
+        <div class="section-heading">
+          <p class="section-label">Quick start</p>
+          <h2 id="quick-start-title">Create a frame, then decode at your own boundary.</h2>
+        </div>
+        <div class="code-grid">
+          <div>
+            <h3>Encode</h3>
+            <pre><code>{encodeExample}</code></pre>
+          </div>
+          <div>
+            <h3>Decode</h3>
+            <pre><code>{decodeExample}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="api" class="api-section" aria-labelledby="api-title">
+        <div class="section-heading">
+          <p class="section-label">API semantics</p>
+          <h2 id="api-title">Small return types make failure explicit.</h2>
+        </div>
+        <div class="api-layout">
+          <article class="signature">
+            <h3>Core functions</h3>
+            <ul>
+              <li><code>encode(event, args)</code> returns a <code>42[...]</code> event packet.</li>
+              <li><code>encode_heartbeat()</code> returns the Engine.IO ping packet.</li>
+              <li><code>decode(text)</code> returns <code>Result(Incoming, DecodeError)</code>.</li>
+            </ul>
+          </article>
+          <article class="signature">
+            <h3>Decode errors</h3>
+            <dl class="error-list">
+              {errors.map(([name, detail]) => (
+                <div>
+                  <dt><code>{name}</code></dt>
+                  <dd>{detail}</dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
