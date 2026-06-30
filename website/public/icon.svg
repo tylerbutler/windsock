@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="windsock">
   <rect width="64" height="64" rx="12" fill="#04462c"/>
-  <path d="M15 18h7v4h-3v20h3v4h-7V18Zm34 0v28h-7v-4h3V22h-3v-4h7Z" fill="#d7efe1"/>
-  <text x="32" y="39" text-anchor="middle" font-family="SFMono-Regular, Consolas, monospace" font-size="19" font-weight="700" fill="white">42</text>
+  <path d="M10 15h8v5h-3v24h3v5h-8V15Zm44 0v34h-8v-5h3V20h-3v-5h8Z" fill="#d7efe1"/>
+  <text x="32" y="41" text-anchor="middle" font-family="SFMono-Regular, Consolas, monospace" font-size="27" font-weight="800" fill="white">42</text>
 </svg>
