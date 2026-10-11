@@ -22,3 +22,23 @@ pub fn frame() {
   windsock.encode("submitOp", [json.string("client-1"), json.preprocessed_array([])])
 }
 ```
+
+## Website builds
+
+The Astro website is in `website/`. Use pnpm 10.11.1, as pinned in
+`website/package.json`:
+
+```sh
+cd website
+pnpm install --frozen-lockfile
+pnpm run build
+```
+
+For Cloudflare Workers Builds, set the root directory to `website`, the build
+command to `pnpm run build`, and the build variable `PNPM_VERSION` to `10.11.1`.
+The site is static; its build output is in `website/dist/`.
+
+The workspace configuration includes the website root package and permits the
+build scripts for `esbuild`, `sharp`, and `workerd`. Keep these settings compatible
+with the pinned pnpm version. The `allowBuilds` setting requires pnpm 10.26 or
+later and does not apply to pnpm 10.11.1.
