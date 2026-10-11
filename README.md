@@ -35,8 +35,22 @@ pnpm run build
 ```
 
 For Cloudflare Workers Builds, set the root directory to `website`, the build
-command to `pnpm run build`, and the build variable `PNPM_VERSION` to `10.11.1`.
-The site is static; its build output is in `website/dist/`.
+command to `pnpm run build`, the deploy command to `pnpm exec wrangler deploy`,
+and the build variable `PNPM_VERSION` to `10.11.1`.
+
+The Cloudflare adapter builds the static pages and a Worker entry point in
+`website/dist/`. The `website/wrangler.jsonc` configuration deploys these files
+as the `windsock-website` Worker. The `website/public/.assetsignore` file keeps
+the Worker code and routing metadata out of the public assets.
+
+To deploy from your computer, authenticate with Cloudflare, then build and deploy:
+
+```sh
+cd website
+pnpm exec wrangler login
+pnpm run build
+pnpm exec wrangler deploy
+```
 
 The workspace configuration includes the website root package and permits the
 build scripts for `esbuild`, `sharp`, and `workerd`. Keep these settings compatible
